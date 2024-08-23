@@ -1,0 +1,110 @@
+def search_movies_by_keyword(cursor, keyword):
+    query = """
+        SELECT CONCAT(UPPER(SUBSTRING(f.title, 1, 1)), LOWER(SUBSTRING(f.title, 2))) AS title, f.release_year, f.description
+        FROM project_Anna.film f
+        WHERE f.title LIKE %s OR f.description LIKE %s
+        LIMIT 10;
+    """
+    like_pattern = f"%{keyword}%"
+    cursor.execute(query, (like_pattern, like_pattern))
+    movies = cursor.fetchall()
+
+    if movies:
+        print(f"Глянь-ка, фильмы с твоим описанием '{keyword}'! Надеюсь, не будут одни скучные истории!")
+        for movie in movies:
+            print(f"Фильм: '{movie['title']}', Год: {movie['release_year']}, Описание: {movie['description']}")
+    else:
+        print(f"Слушай, а шото по описанию '{keyword}' ничего не нашлось. Видимо, в этом жанре всё как на привозе – ни одной плохой селедки.")
+
+
+def search_movies_by_genre_and_year(cursor, genre_id, choice_year):
+    genre_query = """
+        SELECT name
+        FROM project_Anna.category
+        WHERE id = %s;
+    """
+    cursor.execute(genre_query, (genre_id,))
+    genre = cursor.fetchone()
+
+    if genre:
+        genre_name = genre['name']
+    else:
+        print(f"""
+Жанр с этим, как его там ID {genre_id} не найден. Ты, милок/милочка правильную циферку написал?
+Вот тебе наставление от тети Симы, номера от 1 до 16. 17 не тыкай, не делай мне нервы""")
+        return
+
+    if '-' in choice_year:
+        start_year, end_year = map(int, choice_year.split('-'))
+        movie_query = """
+            SELECT CONCAT(UPPER(SUBSTRING(f.title, 1, 1)), LOWER(SUBSTRING(f.title, 2))) AS title, f.release_year
+            FROM project_Anna.film f
+            JOIN project_Anna.film_category fc ON f.film_id = fc.film_id
+            WHERE fc.category_id = %s AND f.release_year BETWEEN %s AND %s
+            LIMIT 10;
+        """
+        cursor.execute(movie_query, (genre_id, start_year, end_year))
+    else:
+        year = int(choice_year)
+        movie_query = """
+            SELECT CONCAT(UPPER(SUBSTRING(f.title, 1, 1)), LOWER(SUBSTRING(f.title, 2))) AS title, f.release_year
+            FROM project_Anna.film f
+            JOIN project_Anna.film_category fc ON f.film_id = fc.film_id
+            WHERE fc.category_id = %s AND f.release_year = %s
+            LIMIT 10;
+        """
+        cursor.execute(movie_query, (genre_id, year))
+
+    movies = cursor.fetchall()
+
+    if movies:
+        if '-' in choice_year:
+            print(f"Таки да, фильмы в жанре '{genre_name}' за период с {start_year} по {end_year}:")
+        else:
+            print(f"Таки да, фильмы в жанре '{genre_name}' за {year}:")
+        for movie in movies:
+            print(f"Фильм: '{movie['title']}', Год: {movie['release_year']}")
+    else:
+        if '-' in choice_year:
+            print(f"""Не найдено фильмов в жанре '{genre_name}' за период с {start_year} по {end_year}. Может, все на даче сидят?.""")
+        else:
+            print(f"""В жанре '{genre_name}' за {year} фильмов не случилось. Как-то год этот оказался неудачным!""")
+
+
+def save_search_query(cursor, query_text, nick):
+    insert_query = """
+        INSERT INTO search_queries1 (query_text, nick, date)
+        VALUES (%s, %s, NOW());
+    """
+    cursor.execute(insert_query, (query_text, nick))
+    cursor._connection.commit()
+
+
+def show_popular_queries(cursor):
+    query = """
+        SELECT query_text, COUNT(*) as search_count
+        FROM search_queries1
+        GROUP BY query_text
+        ORDER BY search_count DESC
+        LIMIT 10;
+    """
+    cursor.execute(query)
+    popular_queries = cursor.fetchall()
+
+    if popular_queries:
+        print("Популярные запросы, как у Симочки в лучшие времена:")
+        for idx, query in enumerate(popular_queries, start=1):
+            print(f"{idx}. {query['query_text']} - {query['search_count']} раз(а)")
+    else:
+        print("Популярных запросов нет, как в Одессе дождя – ждём, надеемся!")
+
+
+def get_genre_list(cursor):
+    query = """
+        SELECT id, name
+        FROM project_Anna.category;
+    """
+    cursor.execute(query)
+    genres = cursor.fetchall()
+
+    return genres
