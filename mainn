@@ -1,0 +1,70 @@
+import mysql.connector
+from local_settings2 import HOST, USER, PASSWORD, DATABASE
+from project_funcs import search_movies_by_keyword, search_movies_by_genre_and_year, save_search_query, show_popular_queries, get_genre_list
+
+dbconfig = {
+    'host': HOST,
+    'user': USER,
+    'password': PASSWORD,
+    'database': DATABASE,
+}
+
+
+def main():
+    username = input("Какой, спрашивается, у вас псевдоним? Введи: ")
+    with mysql.connector.connect(**dbconfig) as connection:
+        with connection.cursor(dictionary=True) as cursor:
+            while True:
+                print("""
+Приятно с вами познакомиться, теперь можно и на "ты".
+Так, шо ищем? Выбирай:""")
+                print("1. Таки да, ищем по ключевому слову")
+                print("2. Таки тут можно найти себе кино по жанру и году")
+                print("3. Беня, тут самый цимес, самые популярные запросы")
+                print("4. Все, на сегодня хватит, выходим!")
+                choice = input("""Так, жмем на номер, какой нужен, какой хош: """)
+
+                if choice == '1':
+                    keyword = input("Ну-ка, дай словечко для поиска: ")
+                    search_movies_by_keyword(cursor, keyword)
+                    save_search_query(cursor, keyword, username)
+                elif choice == '2':
+                    genres = get_genre_list(cursor)
+                    print("Выберите жанр или как его там:")
+                    for genre in genres:
+                        print(f"{genre['id']}. {genre['name']}")
+
+                    genre_id = input("""
+1. Action – Тут экшн, мачо! Находи, где пули летают, а герои дерутся.
+2. Animation – Анимация, дружище! Мультяшки, которые и взрослых развлекут.
+3. Children – Для малечи! Тут всё, что малыши любят и смотрят.
+4. Classics – Классика, как в хорошем ресторане – всё проверенное временем.
+5. Comedy – Комедия, чтоб смех и веселье до упаду. Время поржать!
+6. Documentary – Документалки! Тут правда, как на ладони, всё расскажут, что и как.
+7. Drama – Драма, как в жизни – слёзы, эмоции и весь спектр чувств.
+8. Family – Для всей семьи! Здесь все вместе развлекутся и порадуются.
+9. Foreign – Иностранные фильмы! Погружайся в миры, которые далеко от нас.
+10. Games – Игровые фильмы! Для тех, кто хочет видеть свои игры на экране.
+11. Horror – Ужастики, чтоб было страшно до потери пульса. Поторопись, не забудь включить свет!
+12. Music – Музыка! Смотри фильмы, где мелодии качают и заставляют двигаться.
+13. New – Новинки! Всё свежее и только что вышедшее из пекарни.
+14. Sci-Fi – Научная фантастика! Путешествия по космосу и времяпровождение с пришельцами.
+15. Sports – Спорт, как на стадионе! Эмоции, дух соревнований и побед.
+16. Travel – Путешествия! Для тех, кто хочет увидеть мир, не выходя из дома.
+Введи ID жанра, как на рынке выбираешь – что тебе приглянулось, то и выбери: """)
+                    choice_year = input("""
+Напиши год, как выбираешь билет в театр: один год (например, 2005) или диапазон (например, 2000-2010).
+Фильмы есть с 1980 по 2023 – все шо твоей душе угодно: """)
+                    search_movies_by_genre_and_year(cursor, genre_id, choice_year)
+                    save_search_query(cursor, f"Номер ID: {genre_id}, Год: {choice_year}", username)
+                elif choice == '3':
+                    show_popular_queries(cursor)
+                elif choice == '4':
+                    print("Прощаюсь с тобой, как с дорогой тещей – до следующего раза!")
+                    break
+                else:
+                    print("Шо ты делаешь? Выбирай от 1 до 4 и расходимся как в море корабли.")
+
+
+if __name__ == "__main__":
+    main()
