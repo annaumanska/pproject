@@ -14,6 +14,61 @@ SELECT * FROM project_220424ptm_Olessya_Moisseyenko.film_actor;
 CREATE TABLE project_Anna.film_category AS
 SELECT * FROM project_220424ptm_Olessya_Moisseyenko.film_category;
 
+-- добавление описание жанра
+SELECT *
+        FROM project_Anna.category
+        -- WHERE id = 1
+        ;
+ALTER TABLE category ADD COLUMN description VARCHAR(255);
+UPDATE category
+SET description = 'Тут экшн, мачо! Находи, где пули летают, а герои дерутся.'
+WHERE name = 'Action';
+UPDATE category
+SET description = 'Анимация, дружище! Мультяшки, которые и взрослых развлекут.'
+WHERE name = 'Animation';
+UPDATE category
+SET description = 'Для малечи! Тут всё, что малыши любят и смотрят.'
+WHERE name = 'Children';
+UPDATE category
+SET description = 'Классика, как в хорошем ресторане – всё проверенное временем.'
+WHERE name = 'Classics';
+UPDATE category
+SET description = 'Комедия, чтоб смех и веселье до упаду. Время поржать!'
+WHERE name = 'Comedy';
+UPDATE category
+SET description = 'Документалки! Тут правда, как на ладони, всё расскажут, что и как.'
+WHERE name = 'Documentary';
+UPDATE category
+SET description = 'Драма, как в жизни – слёзы, эмоции и весь спектр чувств.'
+WHERE name = 'Drama';
+UPDATE category
+SET description = 'Для всей семьи! Здесь все вместе развлекутся и порадуются.'
+WHERE name = 'Family';
+UPDATE category
+SET description = 'Иностранные фильмы! Погружайся в миры, которые далеко от нас.'
+WHERE name = 'Foreign';
+UPDATE category
+SET description = 'Игровые фильмы! Для тех, кто хочет видеть свои игры на экране.'
+WHERE name = 'Games';
+UPDATE category
+SET description = 'Ужастики, чтоб было страшно до потери пульса. Поторопись, не забудь включить свет!'
+WHERE name = 'Horror';
+UPDATE category
+SET description = 'Музыка! Смотри фильмы, где мелодии качают и заставляют двигаться.'
+WHERE name = 'Music';
+UPDATE category
+SET description = 'Новинки! Всё свежее и только что вышедшее из пекарни.'
+WHERE name = 'New';
+UPDATE category
+SET description = 'Научная фантастика! Путешествия по космосу и времяпровождение с пришельцами.'
+WHERE name = 'Sci-Fi';
+UPDATE category
+SET description = 'Спорт, как на стадионе! Эмоции, дух соревнований и побед.'
+WHERE name = 'Sports';
+UPDATE category
+SET description = 'Путешествия! Для тех, кто хочет увидеть мир, не выходя из дома.'
+WHERE name = 'Travel';
+
 
 SELECT * FROM search_history;
 -- Создание таблицы для сохранение поисков пользователей
